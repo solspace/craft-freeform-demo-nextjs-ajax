@@ -189,10 +189,6 @@ const Form = () => {
   };
 
   useEffect(() => {
-    console.log(formData);
-  }, [formData]);
-
-  useEffect(() => {
     handleReCaptchaVerify().then();
   }, [handleReCaptchaVerify]);
 
