@@ -4,11 +4,11 @@ const nextConfig = {
         return [
             {
                 source: '/actions/freeform/submit',
-                destination: 'https://www.example.com/actions/freeform/submit',
+                destination: 'https://demo.solspace.net/craft/actions/freeform/submit',
             },
             {
-                source: '/my-module/freeform/form-properties/:formId(\\d{1,})',
-                destination: 'https://www.example.com/my-module/freeform/form-properties/:formId(\\d{1,})',
+                source: '/freeform/form/properties/:formId(\\d{1,})',
+                destination: 'https://demo.solspace.net/craft/freeform/form/properties/:formId(\\d{1,})',
             },
         ];
     },
