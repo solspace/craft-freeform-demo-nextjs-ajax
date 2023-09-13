@@ -238,6 +238,8 @@ const Form = () => {
     handleReCaptchaVerify().then(async () => {
       const response = await saveQuoteSubmission({ captchaValue, formData, formProperties });
 
+      stopProcessing();
+
       if (response && response.success) {
         showSubmissionSuccess();
       } else if (response && response.errors) {
@@ -253,8 +255,6 @@ const Form = () => {
           }
         }
       }
-
-      stopProcessing();
     });
   };
 
