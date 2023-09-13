@@ -31,7 +31,7 @@ type FormProperties = {
     value: string;
   },
   freeform_payload: string;
-  reCaptcha: {
+  captcha: {
     enabled: boolean;
     handle: string;
     name: string;
@@ -43,7 +43,7 @@ type FormProperties = {
 
 type Params = {
   formData: FormData;
-  reCaptchaValue: string;
+  captchaValue: string;
   formProperties: FormProperties;
 };
 
@@ -75,7 +75,7 @@ const defaultFormProperties: FormProperties = {
     value: '',
   },
   freeform_payload: '',
-  reCaptcha: {
+  captcha: {
     enabled: false,
     handle: '',
     name: '',
@@ -88,7 +88,7 @@ const defaultFormProperties: FormProperties = {
 const RECAPTCHA_SITE_KEY = '6Lce6nQmAAAAAO5d4LWC6TkECxNRSG7WNiVj17B1';
 
 async function getFormProperties(formId: number) {
-  // See https://docs.solspace.com/craft/freeform/v4/developer/graphql/#how-to-render-a-form
+  // See https://docs.solspace.com/craft/freeform/v5/developer/graphql/#how-to-render-a-form
   const response = await fetch(`/freeform/form/properties/${formId}`, { headers: { 'Accept': 'application/json' }});
 
   if (!response.ok) {
@@ -99,8 +99,8 @@ async function getFormProperties(formId: number) {
 }
 
 async function saveQuoteSubmission(params: Params) {
-  const { reCaptchaValue, formData, formProperties } = params;
-  const { csrf, hash, honeypot, freeform_payload, reCaptcha } = formProperties;
+  const { captchaValue, formData, formProperties } = params;
+  const { csrf, hash, honeypot, freeform_payload, captcha } = formProperties;
 
   const body = new FormData();
   body.append(csrf.name, csrf.token);
@@ -108,7 +108,7 @@ async function saveQuoteSubmission(params: Params) {
 
   body.append('formHash', hash);
   body.append('freeform_payload', freeform_payload);
-  body.append(reCaptcha.name, reCaptchaValue);
+  body.append(captcha.name, captchaValue);
 
   body.append('firstName', formData.firstName);
   body.append('lastName', formData.lastName);
@@ -156,7 +156,7 @@ const Form = () => {
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   const [formData, setFormData] = useState(defaultFormData);
-  const [reCaptchaValue, setReCaptchaValue] = useState('');
+  const [captchaValue, setCaptchaValue] = useState('');
   const [formProperties, setFormProperties] = useState(defaultFormProperties);
 
   const startProcessing = () => {
@@ -217,7 +217,7 @@ const Form = () => {
     }
 
     const token = await executeRecaptcha();
-    setReCaptchaValue(token);
+    setCaptchaValue(token);
   }, [executeRecaptcha]);
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
@@ -228,7 +228,7 @@ const Form = () => {
     startProcessing();
 
     handleReCaptchaVerify().then(async () => {
-      const response = await saveQuoteSubmission({ reCaptchaValue, formData, formProperties });
+      const response = await saveQuoteSubmission({ captchaValue, formData, formProperties });
 
       if (response && response.success) {
         showSubmissionSuccess();
