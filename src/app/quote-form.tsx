@@ -149,6 +149,7 @@ async function saveQuoteSubmission(params: Params) {
 }
 
 const Form = () => {
+  const spamMessageRef = useRef<HTMLDivElement>(null);
   const errorMessageRef = useRef<HTMLDivElement>(null);
   const successMessageRef = useRef<HTMLDivElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -193,6 +194,13 @@ const Form = () => {
     }
   };
 
+  const showSpamError = () => {
+    if (spamMessageRef.current) {
+      spamMessageRef.current.style.display = 'block';
+      scrollToTop();
+    }
+  };
+
   const hideSubmissionError = () => {
     if (errorMessageRef.current) {
       errorMessageRef.current.style.display = 'none';
@@ -204,6 +212,12 @@ const Form = () => {
         error.classList.remove('flex');
         error.classList.add('hidden');
       });
+    }
+  };
+
+  const hideSpamError = () => {
+    if (spamMessageRef.current) {
+      spamMessageRef.current.style.display = 'none';
     }
   };
 
@@ -223,6 +237,7 @@ const Form = () => {
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
 
+    hideSpamError();
     hideSubmissionError();
     hideSubmissionSuccess();
     startProcessing();
@@ -234,6 +249,12 @@ const Form = () => {
 
       if (response && response.success) {
         showSubmissionSuccess();
+      } else if (response && response.formErrors) {
+        if (response.formErrors.includes('Please verify that you are not a robot.')) {
+          showSpamError();
+        } else if (response.formErrors.includes('Unknown argument')) {
+          console.error(response.formErrors);
+        }
       } else if (response && response.errors) {
         showSubmissionError();
 
@@ -300,6 +321,9 @@ const Form = () => {
       </div>
       <div ref={errorMessageRef} className="w-full bg-red-100 border border-red-400 text-sm text-left text-red-700 px-4 py-2 rounded-md mb-8" style={{ display: 'none' }}>
         <p>{formProperties.errorMessage}</p>
+      </div>
+      <div ref={spamMessageRef} className="w-full bg-red-100 border border-red-400 text-sm text-left text-red-700 px-4 py-2 rounded-md mb-8" style={{ display: 'none' }}>
+        <p>Please verify that you are not a robot.</p>
       </div>
       <div className="flex flex-col w-full space-y-3">
         <div className="form-row">
