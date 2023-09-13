@@ -246,12 +246,14 @@ const Form = () => {
         showSubmissionError();
 
         for (const [key, value] of Object.entries(response.errors)) {
-          const element = document.querySelector(`.${key}-field .error-message`);
-          if (element) {
-            // @ts-ignore
-            element.innerHTML = value[0];
-            element.classList.add('flex');
-            element.classList.remove('hidden');
+          if (!/^-?\d+$/.test(key)) {
+            const element = document.querySelector(`.${key}-field .error-message`);
+            if (element) {
+              // @ts-ignore
+              element.innerHTML = value[0];
+              element.classList.add('flex');
+              element.classList.remove('hidden');
+            }
           }
         }
       }
