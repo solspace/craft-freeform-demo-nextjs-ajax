@@ -249,7 +249,7 @@ const Form = () => {
 
       if (response && response.success) {
         showSubmissionSuccess();
-      } else if (response && response.formErrors) {
+      } else if (response && response.formErrors && response.formErrors.length > 0) {
         if (response.formErrors.includes('Please verify that you are not a robot.')) {
           showSpamError();
         } else if (response.formErrors.includes('Unknown argument')) {
