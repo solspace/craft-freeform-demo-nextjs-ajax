@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 type FormData = {
+  /*
   workPhone: string;
   subject: string;
   message: string;
@@ -18,6 +19,8 @@ type FormData = {
   cellPhone: string;
   appointmentDate: string;
   acceptTerms: string;
+  */
+  fileUpload: File|string;
 };
 
 type FormProperties = {
@@ -52,6 +55,7 @@ type Params = {
 };
 
 const defaultFormData: FormData = {
+  /*
   workPhone: '',
   subject: '',
   message: '',
@@ -66,6 +70,8 @@ const defaultFormData: FormData = {
   cellPhone: '',
   appointmentDate: '',
   acceptTerms: '',
+  */
+  fileUpload: '',
 };
 
 const defaultFormProperties: FormProperties = {
@@ -112,10 +118,11 @@ async function saveQuoteSubmission(params: Params) {
 
   const body = new FormData();
   body.append(csrf.name, csrf.token);
-  body.append(honeypot.name, honeypot.value);
+  // body.append(honeypot.name, honeypot.value);
 
   body.append('formHash', hash);
   body.append('freeform_payload', freeform_payload);
+  /*
   body.append(captcha.name, captchaValue);
 
   body.append('firstName', formData.firstName);
@@ -136,6 +143,8 @@ async function saveQuoteSubmission(params: Params) {
   }
 
   body.append('acceptTerms', formData.acceptTerms);
+  */
+  body.append('fileUpload', formData.fileUpload);
 
   const response = await fetch('/actions/freeform/submit', {
     method: 'POST',
@@ -233,6 +242,7 @@ const Form = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  /*
   const handleReCaptchaVerify = useCallback(async () => {
     if (!executeRecaptcha) {
       return;
@@ -241,6 +251,7 @@ const Form = () => {
     const token = await executeRecaptcha();
     setCaptchaValue(token);
   }, [executeRecaptcha]);
+  */
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
@@ -250,8 +261,10 @@ const Form = () => {
     hideSubmissionSuccess();
     startProcessing();
 
-    handleReCaptchaVerify().then(async () => {
-      const response = await saveQuoteSubmission({ captchaValue, formData, formProperties });
+    // formData.fileUpload = await toBase64(formData.fileUpload as File) as string;
+
+    // handleReCaptchaVerify().then(async () => {
+      const response = await saveQuoteSubmission({ captchaValue: '', formData, formProperties });
 
       stopProcessing();
 
@@ -278,9 +291,21 @@ const Form = () => {
           }
         }
       }
+    // });
+  };
+
+  const toBase64 = (file: File) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+
+      fileReader.readAsDataURL(file);
+
+      fileReader.onload = () => resolve(fileReader.result);
+      fileReader.onerror = (error) => reject(error);
     });
   };
 
+  /*
   const handleHowDidYouHearAboutThisJobPosting = (event: React.ChangeEvent<HTMLInputElement>): void => {
     let howDidYouHearAboutThisJobPosting = [...formData.howDidYouHearAboutThisJobPosting];
 
@@ -299,6 +324,7 @@ const Form = () => {
   useEffect(() => {
     handleReCaptchaVerify().then();
   }, [handleReCaptchaVerify]);
+  */
 
   /**
    * Note the ignore variable which is initialized to false, and is set to true during cleanup.
@@ -308,7 +334,7 @@ const Form = () => {
     let ignore = false;
 
     // Set your Freeform Form ID from Craft.
-    const formId = 4;
+    const formId = 5;
 
     getFormProperties(formId).then(formProperties => {
       if (!ignore) {
@@ -334,6 +360,7 @@ const Form = () => {
         <p>Please verify that you are not a robot.</p>
       </div>
       <div className="flex flex-col w-full space-y-3">
+        {/*
         <div className="form-row">
           <div className="field-wrapper firstName-field">
             <label htmlFor="firstName">First Name <span className="ml-1 text-[red]">*</span></label>
@@ -456,6 +483,15 @@ const Form = () => {
             <span className="field-error error-message hidden"></span>
           </div>
         </div>
+        */}
+        <div className="form-row">
+          <div className="field-wrapper fileUpload-field">
+            <label htmlFor="fileUpload" className="flex flex-row items-center justify-start">
+              <input className="field-input-file" name="fileUpload" type="file" id="fileUpload" accept="image/*" onClick={event => event.currentTarget.value = ''} onChange={event => setFormData({...formData, fileUpload: event.target.files ? event.target.files[0] : '' })} />
+            </label>
+            <span className="field-error error-message hidden"></span>
+          </div>
+        </div>
         <div className="form-row">
           <div className="flex flex-row items-left justify-left space-y-2 w-full">
             <button ref={submitButtonRef} className="btn-primary" type="submit">Submit</button>
@@ -468,8 +504,11 @@ const Form = () => {
 
 export default function QuoteForm() {
   return (
+    <Form/>
+    /*
     <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
-      <Form />
+      <Form/>
     </GoogleReCaptchaProvider>
+    */
   );
 };
