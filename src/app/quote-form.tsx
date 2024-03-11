@@ -20,7 +20,7 @@ type FormData = {
   appointmentDate: string;
   acceptTerms: string;
   */
-  fileUpload: File|string;
+  fileUpload: FileList|string;
 };
 
 type FormProperties = {
@@ -144,7 +144,10 @@ async function saveQuoteSubmission(params: Params) {
 
   body.append('acceptTerms', formData.acceptTerms);
   */
-  body.append('fileUpload', formData.fileUpload);
+
+  for (let i = 0; i < formData.fileUpload.length; i++) {
+    body.append('fileUpload[]', formData.fileUpload[i]);
+  }
 
   const response = await fetch('/actions/freeform/submit', {
     method: 'POST',
@@ -487,7 +490,7 @@ const Form = () => {
         <div className="form-row">
           <div className="field-wrapper fileUpload-field">
             <label htmlFor="fileUpload" className="flex flex-row items-center justify-start">
-              <input className="field-input-file" name="fileUpload" type="file" id="fileUpload" accept="image/*" onClick={event => event.currentTarget.value = ''} onChange={event => setFormData({...formData, fileUpload: event.target.files ? event.target.files[0] : '' })} />
+              <input multiple className="field-input-file" name="fileUpload" type="file" id="fileUpload" accept="image/*" onClick={event => event.currentTarget.value = ''} onChange={event => setFormData({...formData, fileUpload: event.target.files ? event.target.files : '' })} />
             </label>
             <span className="field-error error-message hidden"></span>
           </div>
