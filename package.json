@@ -3,26 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_USE_SYSTEM_CA=1 NODE_EXTRA_CA_CERTS=$(mkcert -CAROOT)/rootCA.pem next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/forms": "^0.5.11",
     "@types/node": "20.2.5",
     "@types/react": "18.2.7",
     "@types/react-dom": "18.2.4",
-    "@types/react-google-recaptcha": "^2.1.5",
+    "@types/react-google-recaptcha": "^2.1.9",
     "autoprefixer": "10.4.14",
     "eslint": "8.41.0",
     "eslint-config-next": "13.4.4",
-    "next": "13.4.4",
+    "next": "^13.5.11",
     "postcss": "8.4.24",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-google-recaptcha": "^2.1.0",
-    "react-google-recaptcha-v3": "^1.10.1",
+    "react-google-recaptcha-v3": "^1.11.0",
     "tailwindcss": "3.3.2",
     "typescript": "5.0.4"
   }
