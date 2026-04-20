@@ -287,14 +287,12 @@ const Form = () => {
                 setFieldErrors({});
                 showSubmissionSuccess();
             } else if (response) {
-                let hasFieldErrors = false;
+                showSubmissionError();
+
                 let hasSpamError = false;
-                let hasGeneralError = false;
 
                 if (response.errors) {
                     showFieldError(response.errors as ErrorData);
-
-                    hasFieldErrors = true;
                 }
 
                 if (response.formErrors && response.formErrors.length > 0) {
@@ -305,24 +303,16 @@ const Form = () => {
                     }
 
                     if (formErrors.includes('Unknown argument')) {
-                        hasGeneralError = true;
-
                         console.error(formErrors);
                     }
 
                     if (!hasSpamError && !formErrors.includes('Unknown argument')) {
-                        hasGeneralError = true;
-
                         console.error(formErrors);
                     }
                 }
 
                 if (hasSpamError) {
                     showSpamError();
-                }
-
-                if (hasGeneralError || (!hasFieldErrors && !hasSpamError)) {
-                    showSubmissionError();
                 }
             } else {
                 showSubmissionError();
@@ -536,9 +526,9 @@ const Form = () => {
 };
 
 export default function QuoteForm() {
-  return (
+    return (
       <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
           <Form />
       </GoogleReCaptchaProvider>
-  );
+    );
 };
