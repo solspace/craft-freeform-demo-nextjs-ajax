@@ -41,19 +41,18 @@ type FormProperties = {
         value: string;
     },
     freeform_payload: string;
-    reCaptcha: {
-        enabled: boolean;
-        handle: string;
-        name: string;
-    };
-    loadingText: string;
-    successMessage: string;
-    errorMessage: string;
+    settings: {
+        behavior: {
+            processingText: string,
+            successMessage: string,
+            errorMessage: string,
+        },
+    },
 };
 
 type Params = {
     formData: FormData;
-    reCaptchaValue: string | null;
+    captchaValue: string | null;
     formProperties: FormProperties;
 };
 
@@ -85,18 +84,17 @@ const defaultFormProperties: FormProperties = {
         value: '',
     },
     freeform_payload: '',
-    reCaptcha: {
-        enabled: false,
-        handle: '',
-        name: '',
+    settings: {
+        behavior: {
+            processingText: '',
+            successMessage: '',
+            errorMessage: '',
+        },
     },
-    loadingText: '',
-    successMessage: '',
-    errorMessage: '',
 };
 
 async function getFormProperties(): Promise<FormProperties> {
-    // See https://docs.solspace.com/craft/freeform/v4/developer/graphql/#how-to-render-a-form
+    // See https://docs.solspace.com/craft/freeform/v5/developer/graphql/#how-to-render-a-form
     const response = await fetch(`/craft/freeform/form/properties/${FORM_ID}`, {
         headers: {
             Accept: 'application/json',
@@ -111,8 +109,8 @@ async function getFormProperties(): Promise<FormProperties> {
 }
 
 async function saveQuoteSubmission(params: Params) {
-    const { reCaptchaValue, formData, formProperties } = params;
-    const { csrf, hash, honeypot, freeform_payload, reCaptcha } = formProperties;
+    const { captchaValue, formData, formProperties } = params;
+    const { csrf, hash, honeypot, freeform_payload } = formProperties;
 
     const body = new FormData();
     body.append(csrf.name, csrf.token);
@@ -120,10 +118,7 @@ async function saveQuoteSubmission(params: Params) {
 
     body.append('formHash', hash);
     body.append('freeform_payload', freeform_payload);
-
-    if (reCaptcha?.enabled && reCaptcha.name && reCaptchaValue) {
-        body.append(reCaptcha.name, reCaptchaValue);
-    }
+    body.append('g-recaptcha-response', captchaValue);
 
     body.append('firstName', formData.firstName);
     body.append('lastName', formData.lastName);
@@ -150,6 +145,7 @@ async function saveQuoteSubmission(params: Params) {
             'X-CSRF-Token': csrf.token,
             'Cache-Control': 'no-cache',
             'X-Requested-With': 'XMLHttpRequest',
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest',
             'X-Craft-Solspace-Freeform-Mode': 'Headless',
         },
         body,
@@ -261,30 +257,15 @@ const Form = () => {
         startProcessing();
 
         try {
-            let reCaptchaValue: string | null = null;
-
-            if (formProperties.reCaptcha?.enabled) {
-                reCaptchaValue = await handleReCaptchaVerify();
-
-                if (!reCaptchaValue) {
-                    stopProcessing();
-                    showSubmissionError();
-
-                    return;
-                }
-            }
-
-            const response = await saveQuoteSubmission({
-                reCaptchaValue,
-                formData,
-                formProperties,
-            });
+            const captchaValue = await handleReCaptchaVerify();
+            const response = await saveQuoteSubmission({ captchaValue, formData, formProperties });
 
             stopProcessing();
 
             if (response && response.success) {
                 setFormData(defaultFormData);
                 setFieldErrors({});
+
                 showSubmissionSuccess();
             } else if (response) {
                 showSubmissionError();
@@ -373,12 +354,12 @@ const Form = () => {
             <h3 className="mb-4 text-xl font-normal text-left">Quote Form</h3>
             {showSuccess && (
                 <div className="w-full bg-green-100 border border-green-400 text-sm text-left text-green-700 px-4 py-2 rounded-md mb-8">
-                    <p>{formProperties.successMessage}</p>
+                    <p>{formProperties.settings.behavior.successMessage}</p>
                 </div>
             )}
             {showError && (
                 <div className="w-full bg-red-100 border border-red-400 text-sm text-left text-red-700 px-4 py-2 rounded-md mb-8">
-                    <p>{formProperties.errorMessage || 'There was a problem submitting the form.'}</p>
+                    <p>{formProperties.settings.behavior.errorMessage || 'There was a problem submitting the form.'}</p>
                 </div>
             )}
             {showSpam && (
@@ -517,7 +498,7 @@ const Form = () => {
                 </div>
                 <div className="form-row">
                     <div className="flex flex-row items-left justify-left space-y-2 w-full">
-                        <button className="btn-primary" type="submit" disabled={isProcessing || !isFormReady} style={{ cursor: isProcessing || !isFormReady ? 'not-allowed' : 'pointer' }}>{isProcessing ? formProperties.loadingText || 'Submitting...' : !isFormReady ? 'Loading...' : 'Submit'}</button>
+                        <button className="btn-primary" type="submit" disabled={isProcessing || !isFormReady} style={{ cursor: isProcessing || !isFormReady ? 'not-allowed' : 'pointer' }}>{isProcessing ? formProperties.settings.behavior.processingText || 'Submitting...' : !isFormReady ? 'Loading...' : 'Submit'}</button>
                     </div>
                 </div>
             </div>
