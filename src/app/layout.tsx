@@ -6,8 +6,8 @@ import { Metadata } from 'next';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'Next.js + AJAX demo for Freeform 4 for Craft 4',
-    description: 'Next.js + AJAX demo for Freeform 4 for Craft 4',
+    title: 'Next.js + AJAX demo for Freeform 5 for Craft 4',
+    description: 'Next.js + AJAX demo for Freeform 5 for Craft 4',
 };
 
 export default function RootLayout({
